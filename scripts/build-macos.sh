@@ -5,6 +5,8 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 QT_PREFIX=${QT_PREFIX:-$(brew --prefix qtbase)}
 QMAKE=${QMAKE:-$QT_PREFIX/bin/qmake}
 MACDEPLOYQT=${MACDEPLOYQT:-$QT_PREFIX/bin/macdeployqt}
+# Resolve this lexically: QT_PREFIX can be a symlink into Homebrew Cellar.
+QT_LIBRARY_PATH=${QT_LIBRARY_PATH:-$(dirname -- "$(dirname -- "$QT_PREFIX")")/lib}
 if [ -n "${TIPP10_DATABASE:-}" ]; then
     DATABASE_SOURCE=$TIPP10_DATABASE
     BUILD_DIR=${BUILD_DIR:-$ROOT/build/macos-custom}
@@ -37,7 +39,24 @@ cat > bundled-database.qrc <<'QRC'
 QRC
 "$QMAKE" "$ROOT/tipp10.pro" CONFIG+=release "TIPP10_DATABASE_QRC=$BUILD_DIR/bundled-database.qrc" "QMAKE_MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET"
 make -j "${JOBS:-8}"
-if ! "$MACDEPLOYQT" "$BUILD_DIR/bin/tipp10.app" -always-overwrite -codesign=- "-libpath=$QT_PREFIX/lib" "-libpath=$QT_PREFIX/../../lib" > deploy.log 2>&1; then
+# Homebrew's bundled imageformats/iconengines SVG plugins depend on
+# QtSvg.framework even though nothing here links it directly. On a fresh
+# app bundle macdeployqt can fail with "Cannot resolve rpath .../QtSvg"
+# because its -libpath search does not cover plugin dependencies; it only
+# succeeds once the framework already exists inside the bundle. Pre-seed it
+# (and QtSvgWidgets, which QtSvg's own dependents may need) when installed.
+mkdir -p "$BUILD_DIR/bin/tipp10.app/Contents/Frameworks"
+for extra_framework in QtSvg QtSvgWidgets; do
+    extra_framework_path="$QT_LIBRARY_PATH/$extra_framework.framework"
+    extra_framework_dest="$BUILD_DIR/bin/tipp10.app/Contents/Frameworks/$extra_framework.framework"
+    if [ -d "$extra_framework_path" ] && [ ! -e "$extra_framework_dest" ]; then
+        # -L dereferences Homebrew's symlink into the Cellar; a plain copy of
+        # the symlink would embed a target relative path that is invalid
+        # once moved inside the app bundle.
+        cp -RL "$extra_framework_path" "$extra_framework_dest"
+    fi
+done
+if ! "$MACDEPLOYQT" "$BUILD_DIR/bin/tipp10.app" -always-overwrite -codesign=- "-libpath=$QT_PREFIX/lib" "-libpath=$QT_LIBRARY_PATH" > deploy.log 2>&1; then
     cat deploy.log
     exit 1
 fi

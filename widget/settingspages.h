@@ -144,6 +144,12 @@ class DatabasePage : public QWidget {
 		*/
 		void setDatabasePath();
 
+		//! Slot, exports a copy of the active database to a user-chosen file.
+		void exportDatabase();
+
+		//! Slot, imports a user-chosen database file, replacing the active one.
+		void importDatabase();
+
 	private:
 
     	//! Creates two user data reset buttons.
@@ -151,6 +157,9 @@ class DatabasePage : public QWidget {
 
     	//! Creates a database path control.
 		void createGroupDatabase();
+
+    	//! Creates the database import/export controls.
+		void createGroupDatabaseBackup();
 
 		//! Creates the layout of the complete class.
 		void createLayout();
@@ -163,9 +172,12 @@ class DatabasePage : public QWidget {
 		QLineEdit *lineDatabasePath;
 		QGroupBox *groupUserReset;
 		QGroupBox *groupDatabase;
+		QGroupBox *groupDatabaseBackup;
 		QPushButton *buttonLessonsReset;
 		QPushButton *buttonCharsReset;
 		QPushButton *buttonDatabasePath;
+		QPushButton *buttonDatabaseExport;
+		QPushButton *buttonDatabaseImport;
 		QString currentDatabasePath;
 };
 

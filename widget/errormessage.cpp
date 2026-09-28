@@ -263,6 +263,30 @@ QString ErrorMessage::getErrorText(int number) {
 				"Bitte ueberpruefen Sie, ob es sich um eine beschreibbare Textdatei "
 				"handelt.\n");
 			break;
+		case ERR_USER_DB_EXPORT_WRITE:
+			errorText = tr("Die Datenbank konnte leider nicht exportiert "
+				"werden.\n"
+				"Bitte ueberpruefen Sie, ob der gewaehlte Zielort beschreibbar "
+				"ist.\n");
+			break;
+		case ERR_USER_DB_IMPORT_INVALID:
+			errorText = tr("Die ausgewaehlte Datei ist leider keine "
+				"gueltige ") + APP_NAME + tr("-Datenbank.\n"
+				"Bitte waehlen Sie eine Datenbankdatei (\"") + APP_USER_DB +
+				tr("\") aus.\n");
+			break;
+		case ERR_USER_DB_IMPORT_BACKUP:
+			errorText = tr("Von der aktuellen Datenbank konnte kein "
+				"Sicherheitsbackup erstellt werden.\n"
+				"Der Import wurde deshalb zu Ihrem Schutz nicht "
+				"durchgefuehrt.\n");
+			break;
+		case ERR_USER_DB_IMPORT_WRITE:
+			errorText = tr("Die ausgewaehlte Datenbank konnte nicht an die "
+				"Stelle der aktuellen Datenbank kopiert werden.\n"
+				"Ihre bisherige Datenbank wurde nicht veraendert; ein "
+				"Backup wurde bereits angelegt.\n");
+			break;
 		case ERR_TEMP_FILE_CREATION:
 			errorText = tr("Temporaere Datei konnte nicht erzeugt "
 				"werden.");

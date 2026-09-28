@@ -59,6 +59,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #define ERR_USER_IMPORT_EMPTY			314
 #define ERR_USER_DOWNLOAD_EXECUTION		315
 #define ERR_USER_EXPORT_WRITE			316
+#define ERR_USER_DB_EXPORT_WRITE		317
+#define ERR_USER_DB_IMPORT_INVALID		318
+#define ERR_USER_DB_IMPORT_BACKUP		319
+#define ERR_USER_DB_IMPORT_WRITE		320
 
 // Update operations error numbers
 #define ERR_TEMP_FILE_CREATION 			401

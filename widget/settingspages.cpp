@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSqlQuery>
+#include <QSqlDatabase>
 #include <QFontDialog>
 #include <QColorDialog>
 #include <QFileDialog>
@@ -37,10 +38,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <QVariant>
 #include <QColor>
 #include <QPalette>
+#include <QFile>
+#include <QFileInfo>
+#include <QDateTime>
 
 #include "settingspages.h"
 #include "def/defines.h"
 #include "sql/startsql.h"
+#include "sql/connection.h"
 #include "def/errordefines.h"
 #include "errormessage.h"
 #include "regexpdialog.h"
@@ -310,6 +315,7 @@ DatabasePage::DatabasePage(QWidget *parent) : QWidget(parent) {
 	// Create group boxes with settings
     createGroupUserReset();
     createGroupDatabase();
+    createGroupDatabaseBackup();
 
 	// Set the layout of all widgets created above
 	createLayout();
@@ -318,6 +324,8 @@ DatabasePage::DatabasePage(QWidget *parent) : QWidget(parent) {
 	connect(buttonLessonsReset, SIGNAL(clicked()), this, SLOT(deleteUserLessonList()));
 	connect(buttonCharsReset, SIGNAL(clicked()), this, SLOT(deleteUserChars()));
 	connect(buttonDatabasePath, SIGNAL(clicked()), this, SLOT(setDatabasePath()));
+	connect(buttonDatabaseExport, SIGNAL(clicked()), this, SLOT(exportDatabase()));
+	connect(buttonDatabaseImport, SIGNAL(clicked()), this, SLOT(importDatabase()));
 
 	// Read settings
 	readSettings();
@@ -397,11 +405,35 @@ void DatabasePage::createGroupDatabase() {
 	groupDatabase->setLayout(layout);
 }
 
+void DatabasePage::createGroupDatabaseBackup() {
+	// Group "Datenbank sichern"
+	groupDatabaseBackup = new QGroupBox(tr("Datenbank sichern"));
+
+	buttonDatabaseExport = new QPushButton(tr("Datenbank &exportieren..."));
+	buttonDatabaseExport->setToolTip(tr("Hier koennen Sie eine Kopie Ihrer "
+		"aktuellen Datenbank\n(mit allen Lektionen und Ergebnissen) an "
+		"einem frei waehlbaren Ort speichern."));
+
+	buttonDatabaseImport = new QPushButton(tr("Datenbank &importieren..."));
+	buttonDatabaseImport->setToolTip(tr("Hier koennen Sie eine zuvor "
+		"exportierte oder anderweitig erhaltene\nDatenbankdatei laden. Die "
+		"aktuelle Datenbank wird dabei ersetzt\n(ein Backup wird vorher "
+		"automatisch angelegt)."));
+
+	// Layout of group box
+	QVBoxLayout *layout = new QVBoxLayout;
+	layout->addWidget(buttonDatabaseExport);
+	layout->addWidget(buttonDatabaseImport);
+	layout->setContentsMargins(16, 16, 16, 16);
+	groupDatabaseBackup->setLayout(layout);
+}
+
 void DatabasePage::createLayout() {
 	// Full layout of all widgets vertical
 	QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(groupUserReset);
     mainLayout->addWidget(groupDatabase);
+    mainLayout->addWidget(groupDatabaseBackup);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);
@@ -425,6 +457,125 @@ void DatabasePage::setDatabasePath() {
 	if (s.size() != 0) {
 		lineDatabasePath->setText(s);
 	}
+}
+
+void DatabasePage::exportDatabase() {
+	QString suggestedName = QFileInfo(currentDatabasePath).fileName();
+	if (suggestedName.isEmpty()) {
+		suggestedName = APP_USER_DB;
+	}
+	QString destination = QFileDialog::getSaveFileName(
+		this,
+		tr("Datenbank exportieren..."),
+		suggestedName,
+		tr("Tipp10-Datenbank (*.db)"));
+	if (destination.isEmpty()) {
+		return;
+	}
+	if (!destination.endsWith(".db", Qt::CaseInsensitive)) {
+		destination.append(".db");
+	}
+	if (QFile::exists(destination)) {
+		QFile::remove(destination);
+	}
+
+	// Close the active connection first so the database file on disk is
+	// fully flushed and consistent before it gets copied.
+	QSqlDatabase db = QSqlDatabase::database();
+	if (db.isOpen()) {
+		db.close();
+	}
+
+	bool ok = QFile::copy(currentDatabasePath, destination);
+
+	// Reopen the connection regardless of the copy result.
+	createConnection();
+
+	if (!ok) {
+		ErrorMessage *errorMessage = new ErrorMessage(this);
+		errorMessage->showMessage(ERR_USER_DB_EXPORT_WRITE, TYPE_WARNING,
+			CANCEL_OPERATION, destination);
+		return;
+	}
+	QMessageBox::information(this, APP_NAME,
+		tr("Die Datenbank wurde erfolgreich exportiert nach:\n") + destination);
+}
+
+void DatabasePage::importDatabase() {
+	QString source = QFileDialog::getOpenFileName(
+		this,
+		tr("Datenbank importieren..."),
+		QFileInfo(currentDatabasePath).absolutePath(),
+		tr("Tipp10-Datenbank (*.db)"));
+	if (source.isEmpty()) {
+		return;
+	}
+
+	// Validate the chosen file on a separate connection, without touching
+	// the active database connection.
+	bool valid = false;
+	{
+		QSqlDatabase checkDb = QSqlDatabase::addDatabase("QSQLITE", "import-check");
+		checkDb.setDatabaseName(source);
+		if (checkDb.open()) {
+			QSqlQuery checkQuery(checkDb);
+			valid = checkQuery.exec("SELECT * FROM db_version ORDER BY version DESC;")
+				&& checkQuery.first();
+			checkDb.close();
+		}
+	}
+	QSqlDatabase::removeDatabase("import-check");
+
+	if (!valid) {
+		ErrorMessage *errorMessage = new ErrorMessage(this);
+		errorMessage->showMessage(ERR_USER_DB_IMPORT_INVALID, TYPE_WARNING,
+			CANCEL_OPERATION, source);
+		return;
+	}
+
+	if (QMessageBox::question(this, APP_NAME,
+		tr("Beim Import werden alle bisherigen Lektionen und "
+		"Ergebnisse durch den Inhalt\nder ausgewaehlten Datenbank "
+		"ersetzt. Von der aktuellen Datenbank wird vorher\n"
+		"automatisch ein Backup angelegt.\n\n"
+		"Wollen Sie den Import wirklich fortsetzen?\n\n"),
+		tr("&Ja"), tr("&Abbrechen"), 0, 1) != 0) {
+		return;
+	}
+
+	QString backupPath = currentDatabasePath + "." +
+		QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss") + ".bak";
+
+	// Close the active connection before touching the file on disk.
+	QSqlDatabase db = QSqlDatabase::database();
+	if (db.isOpen()) {
+		db.close();
+	}
+
+	if (!QFile::copy(currentDatabasePath, backupPath)) {
+		createConnection();
+		ErrorMessage *errorMessage = new ErrorMessage(this);
+		errorMessage->showMessage(ERR_USER_DB_IMPORT_BACKUP, TYPE_WARNING,
+			CANCEL_OPERATION, currentDatabasePath);
+		return;
+	}
+
+	QFile::remove(currentDatabasePath);
+	if (!QFile::copy(source, currentDatabasePath)) {
+		// Restore the previous database so the app keeps working.
+		QFile::copy(backupPath, currentDatabasePath);
+		createConnection();
+		ErrorMessage *errorMessage = new ErrorMessage(this);
+		errorMessage->showMessage(ERR_USER_DB_IMPORT_WRITE, TYPE_WARNING,
+			CANCEL_OPERATION, source);
+		return;
+	}
+
+	createConnection();
+	QMessageBox::information(this, APP_NAME,
+		tr("Die Datenbank wurde erfolgreich importiert!\n\n"
+		"Ein Backup der vorherigen Datenbank wurde angelegt unter:\n") +
+		backupPath);
 }
 
 void DatabasePage::deleteUserLessonList() {

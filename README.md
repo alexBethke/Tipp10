@@ -18,6 +18,8 @@ macOS; it is not an official TIPP10 release.
 - Embedded sounds, offline help, and the original starter database.
 - Added optional bundling of a local database for personal builds; school lessons
   are excluded from the default build.
+- Added an in-app database export/import tool (Settings > Lernstatistik >
+  "Datenbank sichern") with automatic backups before importing.
 - Fixed the macOS database path lookup and an out-of-bounds numpad array write.
 - Added a smoke test covering lesson input, saved results, database reopening,
   sound loading, help, and settings.
@@ -51,6 +53,7 @@ Build settings can be overridden with environment variables:
 | Variable | Purpose |
 | --- | --- |
 | `QT_PREFIX` | Use a different Qt installation instead of Homebrew's `qtbase`. |
+| `QT_LIBRARY_PATH` | Additional library directory for packaging split Qt installations. |
 | `BUILD_DIR` | Output directory; defaults to `build/macos`, or `build/macos-custom` with a custom database. |
 | `TIPP10_DATABASE` | Explicitly bundle a local SQLite database instead of the original starter database. |
 | `JOBS` | Set parallel build jobs; defaults to 8. |
@@ -62,9 +65,7 @@ which keeps generated files in `build/macos`. See also Qt's
 
 ## Lessons and database
 
-Default builds bundle only the original `release/tipp10v2.template`. They do not
-include lessons from **Dientzenhofer Schule - Brannenburg**. Merely placing a
-`tipp10v2.db` file in the repository does not include it in a build.
+Default builds bundle only the original `release/tipp10v2.template`.
 
 ### Optional local database
 
@@ -100,15 +101,28 @@ The selected starter database is embedded under the internal resource name
 ```
 
 Previously configured database locations are respected. Custom lessons appear
-under **Eigene Lektionen**. The local school database used during development
-contains 163 custom lessons.
+under **Eigene Lektionen**.
 
 Both standard and custom builds use the same user settings and database location.
 Replacing or rebuilding the app **does not replace an existing user database**.
-Your installed school lessons therefore remain available when you run a standard
-build on the same Mac, even though they are not in that app's bundle.
+Your installed lessons therefore remain available when you run a standard build
+on the same Mac, even though they are not in that app's bundle.
 
-To use a different local database without rebuilding:
+### Importing and exporting the database
+
+Settings > Lernstatistik > **Datenbank sichern** provides two buttons for
+managing the whole active database from within the app:
+
+- **Datenbank exportieren...** saves a copy of the current database (all lessons
+  and training results) to a location you choose.
+- **Datenbank importieren...** replaces the active database with a chosen `.db`
+  file. The file is validated before anything is changed, a timestamped backup
+  of the current database is created automatically next to it, and the lesson
+  list refreshes once the settings dialog closes.
+
+This is the recommended way to back up your data or switch databases (e.g. to
+one containing custom lessons) without leaving the app. To replace the database
+manually instead:
 
 1. Quit Tipp10 completely.
 2. Locate the active database. The default location is shown above; check the
@@ -117,8 +131,8 @@ To use a different local database without rebuilding:
 4. Copy your chosen database into that location as `tipp10v2.db`.
 5. Reopen Tipp10 and select **Eigene Lektionen**.
 
-This replaces the active database; it does not merge existing lessons or results.
-Keep the backup if you need to restore your previous data.
+Either method replaces the active database; neither merges existing lessons or
+results. Keep the backup if you need to restore your previous data.
 
 ## Smoke test
 
@@ -147,7 +161,7 @@ Those changes are inherited here. The legacy network code remains disabled and
 has not been ported to Qt 6. The available interface language remains German,
 configured by `APP_EXISTING_LANGUAGES_GUI` in `def/defines.h`.
 
-![Error correction in the upstream fork](screenshot-v2.1.1.png)
+![Error correction in the upstream fork](screenshot-macos26.png)
 
 [Upstream demonstration video](https://youtu.be/XZ6Yd2Q7kIQ)
 
