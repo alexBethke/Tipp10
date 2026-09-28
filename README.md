@@ -163,8 +163,6 @@ configured by `APP_EXISTING_LANGUAGES_GUI` in `def/defines.h`.
 
 ![Error correction in the upstream fork](screenshot-macos26.png)
 
-[Upstream demonstration video](https://youtu.be/XZ6Yd2Q7kIQ)
-
 ## License
 
 The original TIPP10 code and this fork are distributed under the GNU General
