@@ -51,15 +51,11 @@ HelpBrowser::HelpBrowser(QString link, QWidget *parent) : QDialog(parent) {
 
     textBrowser->setOpenExternalLinks(true);
 	
-    textBrowser->setSource(QString("file:///") + 
-    	QCoreApplication::applicationDirPath() + 
-    	QString("/help/") + language + QString("/index.html"));
+    textBrowser->setSource(QString("qrc:/help/") + language + QString("/index.html"));
     	
     if (link != "") {
     
-		textBrowser->setSource(QString("file:///") + 
-			QCoreApplication::applicationDirPath() + 
-			QString("/help/") + language + QString("/content/") + link);
+		textBrowser->setSource(QString("qrc:/help/") + language + QString("/content/") + link);
 			
 	}
 
@@ -115,7 +111,7 @@ void HelpBrowser::createLayout() {
     mainLayout->addLayout(layoutHorizontal);
     mainLayout->addSpacing(1);
     mainLayout->addLayout(buttonLayoutBottom);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);

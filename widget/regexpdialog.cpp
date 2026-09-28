@@ -133,7 +133,7 @@ void RegExpDialog::createLayout() {
     mainLayout->addWidget(labelReplaceHelp);
     mainLayout->addSpacing(10);
     mainLayout->addLayout(buttonLayoutHorizontal);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);
 }

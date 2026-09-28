@@ -1,3 +1,4 @@
+#include <QRandomGenerator>
 
 #include "charball.h"
 
@@ -7,7 +8,7 @@
 //static double TwoPi = 2.0 * Pi;
 
 CharBall::CharBall(int size, int position, int speed, QChar character)
-    : color(qrand() % 128 + 128, qrand() % 128 + 128, qrand() % 128 + 128) {
+    : color(QRandomGenerator::global()->generate() % 128 + 128, QRandomGenerator::global()->generate() % 128 + 128, QRandomGenerator::global()->generate() % 128 + 128) {
 
 	currentSpeed = speed;
 	currentRadius = size/2;

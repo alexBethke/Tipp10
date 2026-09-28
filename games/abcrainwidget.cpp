@@ -1,3 +1,4 @@
+#include <QRandomGenerator>
 
 #include <QIcon>
 #include <QTime>
@@ -42,8 +43,6 @@ static const int FontSizeH4 = 50;
 
 AbcRainWidget::AbcRainWidget(QWidget *parent) : QWidget(parent) {
 
-	qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-
 	gamePaused = 0;
 	gameStarted = 0;
 	gameOvered = 0;
@@ -84,7 +83,7 @@ AbcRainWidget::AbcRainWidget(QWidget *parent) : QWidget(parent) {
     view = new QGraphicsView;
 	view->setScene(scene);
     view->setRenderHint(QPainter::Antialiasing);
-    view->setBackgroundBrush(QPixmap(":/games/img/pattern_" + QString::number(qrand() % 16) + ".png"));
+    view->setBackgroundBrush(QPixmap(":/games/img/pattern_" + QString::number(QRandomGenerator::global()->generate() % 16) + ".png"));
     view->setCacheMode(QGraphicsView::CacheBackground);
     //view->setDragMode(QGraphicsView::ScrollHandDrag);
     //view->setSceneRect(AreaX, AreaY, AreaWidth + 200, AreaHeight + 200);
@@ -122,7 +121,7 @@ AbcRainWidget::AbcRainWidget(QWidget *parent) : QWidget(parent) {
     mainLayout->addWidget(view);
     mainLayout->addSpacing(1);
     mainLayout->addLayout(bottomLayout);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);
@@ -202,24 +201,24 @@ void AbcRainWidget::setBall() {
 
 	if (abclist.size() > 0) {
 		// Zufaelligen Buchstaben aus der ABC-Liste entnehmen
-		QChar characterTemp = abclist.takeAt((qrand() % abclist.size()));
+		QChar characterTemp = abclist.takeAt((QRandomGenerator::global()->generate() % abclist.size()));
 		// Kugel erzeugen
 		int position = 0;
 		if ((ballCounter % 4) == 0) {
 			// 1/4
-			position = (qrand() % ((GroundWidth / 4) - (BallWidth / 2)) + 1) + (BallWidth / 2);
+			position = (QRandomGenerator::global()->generate() % ((GroundWidth / 4) - (BallWidth / 2)) + 1) + (BallWidth / 2);
 		}
 		if ((ballCounter % 4) == 1) {
 			// 3/4
-			position = (qrand() % (GroundWidth / 4) + 1) + (GroundWidth / 2);
+			position = (QRandomGenerator::global()->generate() % (GroundWidth / 4) + 1) + (GroundWidth / 2);
 		}
 		if ((ballCounter % 4) == 2) {
 			// 2/4
-			position = (qrand() % (GroundWidth / 4) + 1) + (GroundWidth / 4);
+			position = (QRandomGenerator::global()->generate() % (GroundWidth / 4) + 1) + (GroundWidth / 4);
 		}
 		if ((ballCounter % 4) == 3) {
 			// 4/4
-			position = (qrand() % ((GroundWidth / 4) - (BallWidth / 2)) + 1) + (3 * GroundWidth / 4);
+			position = (QRandomGenerator::global()->generate() % ((GroundWidth / 4) - (BallWidth / 2)) + 1) + (3 * GroundWidth / 4);
 		}
 		charballs.append(
 			new CharBall(
@@ -232,7 +231,7 @@ void AbcRainWidget::setBall() {
 		charlist.append(characterTemp);
 
 		scene->addItem(charballs.last());
-		charballs.last()->wind = (qrand() % 8) + 2;
+		charballs.last()->wind = (QRandomGenerator::global()->generate() % 8) + 2;
 		charballs.last()->rad = 0;
 
 		chartext.append(new QGraphicsTextItem(QString(characterTemp),
@@ -309,7 +308,7 @@ void AbcRainWidget::timerEvent() {
 		int xTemp;
 
 		foreach (CharBall *charball, charballs) {
-			charball->rad += charball->wind * (qrand() % 2 + 1);
+			charball->rad += charball->wind * (QRandomGenerator::global()->generate() % 2 + 1);
 			xTemp = (int) ((qreal) charball->x() - cos((charball->rad / 180) * Pi) * 2);
 			if (xTemp < (BallWidth / 2)) {
 				xTemp = (BallWidth / 2);
@@ -365,7 +364,7 @@ void AbcRainWidget::setGameOver() {
 void AbcRainWidget::setLevel() {
 	showLevel = 1;
 	//QGraphicsItem *gameOver = new QGraphicsItem(0);
-    view->setBackgroundBrush(QPixmap(":/games/img/pattern_" + QString::number(qrand() % 16) + ".png"));
+    view->setBackgroundBrush(QPixmap(":/games/img/pattern_" + QString::number(QRandomGenerator::global()->generate() % 16) + ".png"));
 
 	levelText->setPlainText(
 		"LEVEL " + QString::number(level + 1)

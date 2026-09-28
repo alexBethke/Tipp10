@@ -68,7 +68,7 @@ QVariant CharSqlModel::data(const QModelIndex &index, int role) const {
                     errorRatioString = "0";
                 }
                 errorRatio = errorRatioString.toDouble();
-                errorRatioString.sprintf("%.0f", errorRatio);
+                errorRatioString = QString::number(errorRatio, 'f', 0);
                 // Append a percent sign
                 return errorRatioString.append(tr(" %"));
 			}
@@ -81,14 +81,14 @@ QVariant CharSqlModel::data(const QModelIndex &index, int role) const {
 		font.setFamily("Courier New");
 		font.setPointSize(font.pointSize() + 2);
 		font.setBold(true);
-		return qVariantFromValue(font);
+		return QVariant::fromValue(font);
 	}
 	// Change font of first column to bold
 	if (role == Qt::FontRole && index.column() == 4) {
 		QFont font;
 		font = parentWidget->font();
 		font.setBold(true);
-		return qVariantFromValue(font);
+		return QVariant::fromValue(font);
 	}
 	return value;
 }

@@ -156,11 +156,11 @@ void ProgressionWidget::getChartValues() {
         lessonsNames.append(query.value(6).toString());
 		// Grade of the lesson
         gradeTemp = (query.value(2).toDouble() > 0 ? query.value(2).toDouble() : 0);
-        gradeTempString.sprintf("%.0f", gradeTemp);
+        gradeTempString = QString::number(gradeTemp, 'f', 0);
         lessonsGrades.append(gradeTempString.toInt());
         // CPM of the lesson
         cpmTemp = query.value(4).toDouble();
-        cpmTempString.sprintf("%.0f", cpmTemp);
+        cpmTempString = QString::number(cpmTemp, 'f', 0);
         lessonsCpms.append(cpmTempString.toInt());
 
 		// Maximum

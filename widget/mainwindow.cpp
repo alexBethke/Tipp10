@@ -199,7 +199,9 @@ void MainWindow::createActions() {
 	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 	connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 	connect(settingsAction, SIGNAL(triggered()), this, SLOT(showSettings()));
+#ifdef ONLINE
 	connect(updateAction, SIGNAL(triggered()), this, SLOT(showUpdate()));
+#endif
 	connect(evalAction, SIGNAL(triggered()), this,
         SLOT(toggleStartToEvaluation()));
     connect(websiteAction, SIGNAL(triggered()), this, SLOT(openWebsite()));

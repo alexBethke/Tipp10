@@ -8,3 +8,8 @@ tipp10.pro.user
 tipp10.pro.user.90c9e41.4.8-pre1
 
 .qmake.stash
+
+# Optional local lesson databases and SQLite sidecar files
+/tipp10v2.db
+/tipp10v2.db-*
+/private-lessons/

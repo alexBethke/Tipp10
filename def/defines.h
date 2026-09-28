@@ -26,16 +26,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #ifndef DEFINES_H
 #define DEFINES_H
 
-// OS constants
-#define APP_WIN						false
-#define APP_MAC						false
-#define APP_X11						true
+// Derive platform settings from Qt's target platform.
+#include <QtGlobal>
+#if defined(Q_OS_MACOS)
+#define APP_WIN false
+#define APP_MAC true
+#define APP_X11 false
+#elif defined(Q_OS_WIN)
+#define APP_WIN true
+#define APP_MAC false
+#define APP_X11 false
+#else
+#define APP_WIN false
+#define APP_MAC false
+#define APP_X11 true
+#endif
 #define APP_PORTABLE				false //at least one of the 3 OS must be true too!
 
 // Languages
 #define APP_EXISTING_LANGUAGES_GUI	"de" // "de;en"
 #define APP_STD_LANGUAGE_GUI		"de"
-#define APP_STD_LANGUAGE_LAYOUT		"de_qwertz_win"
+#if APP_MAC
+#define APP_STD_LANGUAGE_LAYOUT "de_qwertz_mac"
+#else
+#define APP_STD_LANGUAGE_LAYOUT "de_qwertz_win"
+#endif
 #define APP_STD_LANGUAGE_LESSON		"de_de_qwertz"
 
 // Common program constants

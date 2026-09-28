@@ -29,9 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <QVariant>
 #include <QSqlDatabase>
 #include <QDateTime>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
-#include <QRegExp>
 
 #include "trainingsql.h"
 #include "def/defines.h"
@@ -421,11 +420,11 @@ QString TrainingSql::replaceRoutine(QString content, bool useEszett,
         }
     }
     if (replaceSetting != "") {
-        QStringList replaceList = replaceSetting.split(",", QString::SkipEmptyParts);
+        QStringList replaceList = replaceSetting.split(",", Qt::SkipEmptyParts);
         QStringList searchReplace;
 
         for (int i = 0; i < replaceList.size(); ++i) {
-             searchReplace = replaceList.at(i).split("=", QString::SkipEmptyParts);
+             searchReplace = replaceList.at(i).split("=", Qt::SkipEmptyParts);
              if (searchReplace.size() >= 2) {
                  content.replace(searchReplace.at(0), searchReplace.at(1), Qt::CaseSensitive);
              }
@@ -434,7 +433,7 @@ QString TrainingSql::replaceRoutine(QString content, bool useEszett,
     if (regexpSetting.left(2) == "[^") {
         regexpSetting = regexpSetting.left(2) + QChar(TOKEN_NEW_LINE) +
                          QChar(TOKEN_TAB) + regexpSetting.mid(2);
-        content.replace(QRegExp(regexpSetting), "");
+        content.replace(QRegularExpression(regexpSetting), "");
     }
 	return content;
 

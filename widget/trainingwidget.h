@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <QTimer>
 #include <QPushButton>
 #include <QDateTime>
-#include <QSound>
+#include <QSoundEffect>
 
 #include "tickerboard.h"
 #include "keyboard.h"
@@ -207,8 +207,8 @@ class TrainingWidget : public QWidget {
 		QPushButton *buttonCancel;
 		QPushButton *buttonHelp;
         QString opSystem;
-        QSound *bells;
-        QSound *metronomeSound;
+        QSoundEffect *bells;
+        QSoundEffect *metronomeSound;
 
 		QList<QChar> charList;
 		QList<int> mistakeList;

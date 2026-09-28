@@ -179,11 +179,11 @@ static bool createConnection() {
 				CANCEL_NO, "Betroffener Pfad:\n" + dbPath);*/
 			// Try to create new databae in user path
 			// Exist a database in the program dir?
-			if (QFile::exists(QCoreApplication::applicationDirPath() + "/" + dbNameTemplate)) {
+			if (QFile::exists(QString(":/") + dbNameTemplate)) {
 			//if (QFile::exists(":/" + dbNameTemplate)) {
 				// A database exist in the program dir
 				// -> copy database to user home dir
-				QFile file(QCoreApplication::applicationDirPath() + "/" + dbNameTemplate);
+				QFile file(QString(":/") + dbNameTemplate);
 				//QFile file(":/" + dbNameTemplate);
 				if (file.copy(dbPath)) {
 					QFile::setPermissions(dbPath, QFile::permissions(dbPath) | QFile::WriteUser);
@@ -218,7 +218,7 @@ static bool createConnection() {
                 dbHomeTemp.append("/Library/Application Support");
                 #endif
             }
-            dbPath = QDir::homePath() + "/" + dbFolderTemp + "/" + dbNameUser;
+            dbPath = dbHomeTemp + "/" + dbFolderTemp + "/" + dbNameUser;
 
 		} else {
 			// Portable version
@@ -229,7 +229,7 @@ static bool createConnection() {
 		// Exist a database in user's home dir?
         if (QFile::exists(dbPath) == false) {
 			// Exist a database template in the program dir?
-			dbPath = QCoreApplication::applicationDirPath() + "/" + dbNameTemplate;
+			dbPath = QString(":/") + dbNameTemplate;
 			//dbPath = ":/" + dbNameTemplate;
 			if (QFile::exists(dbPath)) {
 				// A database template exist in the program dir

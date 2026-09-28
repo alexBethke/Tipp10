@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QTextStream>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QFont>
 
 #include "startwidget.h"
@@ -263,7 +263,7 @@ void StartWidget::createGroupLimit() {
 	groupLayout->addLayout(tokenLayout);
     groupLayout->addSpacing(20);
 	groupLayout->addLayout(lessonLayout);
-    groupLayout->setMargin(10);
+    groupLayout->setContentsMargins(10, 10, 10, 10);
 	groupLimit->setLayout(groupLayout);
 }
 
@@ -331,7 +331,7 @@ void StartWidget::createGroupError() {
 	layout->addWidget(labelIntelligence);
     layout->addStretch(1);
     //layout->addSpacing(10);
-	layout->setMargin(10);
+	layout->setContentsMargins(10, 10, 10, 10);
     // Pass layout to parent widget (group box)
 	groupError->setLayout(layout);
 }
@@ -408,7 +408,7 @@ void StartWidget::createGroupSupport() {
 	selectionLayout->addLayout(siLayout);
     selectionLayout->addSpacing(4);
     selectionLayout->addStretch(1);
-	selectionLayout->setMargin(10);
+	selectionLayout->setContentsMargins(10, 10, 10, 10);
     // Pass layout to parent widget (group box)
 	groupKeyboard->setLayout(selectionLayout);
 }
@@ -462,7 +462,7 @@ void StartWidget::createLayout() {
     mainLayout->addLayout(centerLayout);
     mainLayout->addSpacing(1);
     mainLayout->addLayout(bottomLayout);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);
@@ -1012,9 +1012,10 @@ void StartWidget::clickExportLesson() {
 	fd->setViewMode(QFileDialog::Detail);
 
 	QString fileNameEncoded = "";
-	QRegExp regexp("[A-Za-z0-9_-]*");
-	if (regexp.indexIn(lessonName) > -1) {
-		QStringList list = regexp.capturedTexts();
+	QRegularExpression regexp("[A-Za-z0-9_-]*");
+	const auto match = regexp.match(lessonName);
+	if (match.hasMatch()) {
+		QStringList list = match.capturedTexts();
 		QStringList::iterator it = list.begin();
 		while (it != list.end()) {
 			fileNameEncoded.append(*it);

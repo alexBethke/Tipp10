@@ -108,14 +108,14 @@ QVariant LessonSqlModel::data(const QModelIndex &index, int role) const {
             // Rate
             lessonRate = value.toDouble();
 
-            lessonRateString.sprintf("%.0f", lessonRate);
+            lessonRateString = QString::number(lessonRate, 'f', 0);
             return lessonRateString + " %";;
         }
         if (index.column() == 6) {
             // There is never grade smaller than zero
             lessonCpm = value.toDouble();
 
-            lessonCpmString.sprintf("%.0f", lessonCpm);
+            lessonCpmString = QString::number(lessonCpm, 'f', 0);
             return lessonCpmString;
         }
         if (index.column() == 7) {
@@ -123,7 +123,7 @@ QVariant LessonSqlModel::data(const QModelIndex &index, int role) const {
             if ((lessonGrade = value.toDouble()) < 0) {
                 lessonGrade = 0;
             }
-            lessonGradeString.sprintf("%.0f", lessonGrade);
+            lessonGradeString = QString::number(lessonGrade, 'f', 0);
             return lessonGradeString +
                 (lessonGradeString == "1" ? tr(" Punkt") : tr(" Punkte"));
 		}
@@ -142,12 +142,12 @@ QVariant LessonSqlModel::data(const QModelIndex &index, int role) const {
 		QFont font;
 		font = parentWidget->font();
 		font.setBold(true);
-		return qVariantFromValue(font);
+		return QVariant::fromValue(font);
 	}
 	/*if (role == Qt::BackgroundColorRole) {
 		if (index.row() == coloredRow) {
 			// Show the row with background color
-			return qVariantFromValue(QColor(249, 126, 50));
+			return QVariant::fromValue(QColor(249, 126, 50));
 		}
 	}*/
 	//if (role == Qt::TextColorRole

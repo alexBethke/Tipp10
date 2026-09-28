@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
-    QApplication::setStyle(QStyleFactory::create("plastiquestyle"));
 
     // Set application name and domain
     // (this saves having to repeat the information
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]) {
 		QLocale::system().name()).toString();
 
 	QStringList languagesGui =
-		QString(APP_EXISTING_LANGUAGES_GUI).split(";", QString::SkipEmptyParts);
+		QString(APP_EXISTING_LANGUAGES_GUI).split(";", Qt::SkipEmptyParts);
 
 	QString checkDelims = "_";
 	bool checkSuccessful = true;
@@ -105,7 +104,7 @@ int main(int argc, char *argv[]) {
 
 	QString licenseKey = settings.value("licensekey", "").toString();
 	bool showIllustration = settings.value("check_illustration", true).toBool();
-	bool useNativeStyle = settings.value("check_native_style", false).toBool();
+	bool useNativeStyle = settings.value("check_native_style", APP_MAC).toBool();
     settings.endGroup(); // general
 
 	// Convert old keyboard layout settings to new (since v2.1.0)
@@ -216,7 +215,7 @@ int main(int argc, char *argv[]) {
 
     // Set windows style
 	if (!useNativeStyle) {
-	    app.setStyle("plastique");
+	    app.setStyle("Fusion");
     }
 
 	// Translation

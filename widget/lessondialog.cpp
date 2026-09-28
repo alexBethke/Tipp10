@@ -86,7 +86,7 @@ void LessonDialog::updateContent() {
 			lineLessonContent->setText(lessonData->join("\n"));
 
 			// Split lesson content to lines
-			*lessonData = lineLessonContent->toPlainText().split("\n", QString::SkipEmptyParts);
+			*lessonData = lineLessonContent->toPlainText().split("\n", Qt::SkipEmptyParts);
 			// Delete empty lines
 			for (int i = 0; i < lessonData->size(); i++) {
 				if (QString(lessonData->at(i).toLocal8Bit().constData()).simplified() == "") {
@@ -230,7 +230,7 @@ void LessonDialog::createLayout() {
     mainLayout->addLayout(preLayout);
     mainLayout->addSpacing(1);
     mainLayout->addLayout(buttonLayoutHorizontal);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(5);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);
@@ -256,7 +256,7 @@ void LessonDialog::clickSave() {
 	}
 
 	// Split lesson content to lines
-	contentList = lineLessonContent->toPlainText().split("\n", QString::SkipEmptyParts);
+	contentList = lineLessonContent->toPlainText().split("\n", Qt::SkipEmptyParts);
 	// Delete empty lines
 	for (i = 0; i < contentList.size(); i++) {
 		if (QString(contentList.at(i).toLocal8Bit().constData()).simplified() == "") {

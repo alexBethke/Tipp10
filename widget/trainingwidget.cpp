@@ -55,18 +55,11 @@ TrainingWidget::TrainingWidget(int lesson, int type, QString name, QWidget *pare
 	counterToNewLine = 0;
 	uncorrectedErrors = 0;
 
-    // Init sound file
-    #if APP_MAC
-	// Mac-Version
-    // -----------
-    bells = new QSound(QCoreApplication::applicationDirPath() + "/error.aif");
-    metronomeSound = new QSound(QCoreApplication::applicationDirPath() + "/metronome.aif");
-	#else
-	// Win-Version
-    // -----------
-    bells = new QSound("error.wav");
-    metronomeSound = new QSound("metronome.wav");
-	#endif
+    // Embedded sounds also work when launched from Finder.
+    bells = new QSoundEffect(this);
+    bells->setSource(QUrl("qrc:/error.wav"));
+    metronomeSound = new QSoundEffect(this);
+    metronomeSound->setSource(QUrl("qrc:/metronome.wav"));
 
     // Initialise timer
     timer = new QTimer(this);
@@ -186,7 +179,7 @@ void TrainingWidget::createLayout() {
     mainLayout->addStretch(1);
     mainLayout->addSpacing(10);
     mainLayout->addLayout(bottomLayout);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);

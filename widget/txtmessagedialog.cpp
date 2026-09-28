@@ -89,7 +89,7 @@ void TxtMessageDialog::createLayout() {
     mainLayout->addLayout(layoutHorizontal);
     mainLayout->addSpacing(1);
     mainLayout->addLayout(buttonLayoutHorizontal);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);

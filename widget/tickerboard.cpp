@@ -92,8 +92,8 @@ void TickerBoard::startTicker(bool wasPaused) {
 	if ((lengthCompleteLesson = txtCompleteLesson.length()) > 0) {
 		QFontMetrics fm(tickerFont);
 		// Check current text and position
-    	widthSelection = fm.charWidth(txtCurrentLesson, counterCurrentLesson);
-    	widthCurrentLesson = fm.width(txtCurrentLesson);
+		widthSelection = fm.horizontalAdvance(txtCurrentLesson.mid(counterCurrentLesson, 1));
+		widthCurrentLesson = fm.horizontalAdvance(txtCurrentLesson);
 		newChar = txtCurrentLesson[counterCurrentLesson];
 
 		if (tickerSpeed == 50) {
@@ -190,16 +190,16 @@ bool TickerBoard::prevChar() {
 void TickerBoard::updateSelection()
 {
 	QFontMetrics fm(tickerFont);
-	lessonOffset = fm.width(txtCurrentLesson, counterCurrentLesson+uncorrectedErrors);
+	lessonOffset = fm.horizontalAdvance(txtCurrentLesson, counterCurrentLesson+uncorrectedErrors);
 
 	// Errors will be on the left of lessonOffset
 	if(uncorrectedErrors){
 		widthErrorSelection = lessonOffset -
-				fm.width(txtCurrentLesson, counterCurrentLesson);
+				fm.horizontalAdvance(txtCurrentLesson, counterCurrentLesson);
 	}else{
 		widthErrorSelection = 0;
 	}
-	widthSelection = fm.charWidth(txtCurrentLesson, counterCurrentLesson+uncorrectedErrors);
+	widthSelection = fm.horizontalAdvance(txtCurrentLesson.mid(counterCurrentLesson+uncorrectedErrors, 1));
 }
 
 void TickerBoard::checkUpdateRequired() {
@@ -243,10 +243,10 @@ void TickerBoard::splitLesson() {
 	// Split lection into sentences with line break sign at the end
 	// (split case sensitive and skip empty parts)
 	txtLessonSplited = txtCompleteLesson.split(QChar(TOKEN_NEW_LINE),
-		QString::SkipEmptyParts, Qt::CaseSensitive);
+		Qt::SkipEmptyParts, Qt::CaseSensitive);
 	txtCurrentLesson = txtLessonSplited.at(counterRow) + QChar(TOKEN_NEW_LINE);
 	lengthCurrentLesson = txtCurrentLesson.length();
-	widthCurrentLesson = fm.width(txtCurrentLesson);
+	widthCurrentLesson = fm.horizontalAdvance(txtCurrentLesson);
 	repaint();
 }
 
@@ -271,7 +271,7 @@ void TickerBoard::paintEvent(QPaintEvent *event) {
 
 		painter.setPen(colorFont);
 		QFontMetrics fm(tickerFont);
-		painter.drawText(10 + x - scrollOffset, 15, fm.width(txtCurrentLesson), 35,
+		painter.drawText(10 + x - scrollOffset, 15, fm.horizontalAdvance(txtCurrentLesson), 35,
 			Qt::AlignVCenter, txtCurrentLesson);
 	} else {
 		// Draw pause or start text

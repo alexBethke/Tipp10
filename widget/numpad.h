@@ -247,7 +247,7 @@ class NumPad : public QWidget {
 		void readSettings();
 
 		//! Holds the index (the order) of the key colors.
-		int colorIndex[4];
+		int colorIndex[5];
 
 		//! Holds the images of the keys.
 		QColor keyColors[4];

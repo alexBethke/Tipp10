@@ -111,7 +111,7 @@ void EvaluationWidget::createLayout() {
     mainLayout->addWidget(tabEvaluation);
     mainLayout->addSpacing(1);
     mainLayout->addLayout(bottomLayout);
-    mainLayout->setMargin(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);

@@ -28,7 +28,7 @@ QT              += 	network
 QT              +=      widgets
 QT              +=      multimedia
 QT              +=      printsupport
-RC_FILE         += 	tipp10.rc
+win32:RC_FILE   += tipp10.rc
 RESOURCES       += 	tipp10.qrc
 HEADERS         += 	def/defines.h \
                     def/errordefines.h \
@@ -100,3 +100,15 @@ SOURCES         += 	main.cpp \
                     sql/startsql.cpp \
                     games/abcrainwidget.cpp \
                     games/charball.cpp
+
+# Modern desktop build (legacy ONLINE/QHttp support remains disabled).
+CONFIG += c++17
+macx {
+    CONFIG += app_bundle
+    ICON = $$PWD/img/tipp10.icns
+    QMAKE_TARGET_BUNDLE_PREFIX = org.tipp10
+}
+
+# Default builds contain only the original starter database.
+isEmpty(TIPP10_DATABASE_QRC): TIPP10_DATABASE_QRC = $$PWD/database.qrc
+RESOURCES += $$TIPP10_DATABASE_QRC

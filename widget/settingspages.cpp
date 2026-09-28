@@ -145,7 +145,7 @@ void TrainingPage::createGroupTickerFont() {
 	layout->addWidget(labelTickerSpeed);
 	layout->addLayout(sliderlayout);
 	//layout->addStretch(1);
-	layout->setMargin(16);
+	layout->setContentsMargins(16, 16, 16, 16);
 	groupTickerFont->setLayout(layout);
 }
 
@@ -188,7 +188,7 @@ void TrainingPage::createGroupSoundOutput() {
 	layout->addWidget(radioSpeaker);
     layout->addSpacing(10);
     layout->addLayout(metronome);
-	layout->setMargin(16);
+	layout->setContentsMargins(16, 16, 16, 16);
 	groupSoundOutput->setLayout(layout);
 }
 
@@ -201,7 +201,7 @@ void TrainingPage::createLayout() {
 	// Full layout of all widgets vertical
 	QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(boxesLayout);
-    //mainLayout->setMargin(5);
+    //mainLayout->setContentsMargins(5, 5, 5, 5);
     mainLayout->setSpacing(15);
     // Pass layout to parent widget (this)
 	this->setLayout(mainLayout);
@@ -217,21 +217,21 @@ void TrainingPage::setFont() {
 }
 
 void TrainingPage::setFontColor() {
-    QColor color = QColorDialog::getColor(buttonSetFontColor->palette().background().color(), this);
+    QColor color = QColorDialog::getColor(buttonSetFontColor->palette().window().color(), this);
     if (color.isValid()) {
         buttonSetFontColor->setPalette(QPalette(color));
     }
 }
 
 void TrainingPage::setBgColor() {
-    QColor color = QColorDialog::getColor(buttonSetBgColor->palette().background().color(), this);
+    QColor color = QColorDialog::getColor(buttonSetBgColor->palette().window().color(), this);
     if (color.isValid()) {
         buttonSetBgColor->setPalette(QPalette(color));
     }
 }
 
 void TrainingPage::setCursorColor() {
-    QColor color = QColorDialog::getColor(buttonSetCursorColor->palette().background().color(), this);
+    QColor color = QColorDialog::getColor(buttonSetCursorColor->palette().window().color(), this);
     if (color.isValid()) {
         buttonSetCursorColor->setPalette(QPalette(color));
     }
@@ -289,9 +289,9 @@ void TrainingPage::writeSettings() {
 	QSettings settings;
 	#endif
     settings.beginGroup("settings");
-    settings.setValue("ticker_font_color", buttonSetFontColor->palette().background().color().name());
-    settings.setValue("ticker_bg_color", buttonSetBgColor->palette().background().color().name());
-    settings.setValue("ticker_cursor_color", buttonSetCursorColor->palette().background().color().name());
+    settings.setValue("ticker_font_color", buttonSetFontColor->palette().window().color().name());
+    settings.setValue("ticker_bg_color", buttonSetBgColor->palette().window().color().name());
+    settings.setValue("ticker_cursor_color", buttonSetCursorColor->palette().window().color().name());
     settings.setValue("ticker_font", tickerFont.toString());
 	settings.setValue("ticker_speed", sliderTickerSpeed->value());
 	settings.endGroup();
@@ -348,7 +348,7 @@ void DatabasePage::createGroupUserReset() {
 	layout->addWidget(buttonLessonsReset);
 	layout->addWidget(buttonCharsReset);
 	//layout->addStretch(1);
-	layout->setMargin(16);
+	layout->setContentsMargins(16, 16, 16, 16);
 	groupUserReset->setLayout(layout);
 }
 
@@ -393,7 +393,7 @@ void DatabasePage::createGroupDatabase() {
 	layout->addLayout(hlayout);
 	layout->addWidget(labelDatabaseExplain);
 	//layout->addStretch(1);
-	layout->setMargin(16);
+	layout->setContentsMargins(16, 16, 16, 16);
 	groupDatabase->setLayout(layout);
 }
 
@@ -566,7 +566,7 @@ void OtherPage::createGroupDialogCheck() {
 	layout->addWidget(checkIntelligence);
     layout->addSpacing(8);
     layout->addWidget(checkLimitLesson);
-    layout->setMargin(16);
+    layout->setContentsMargins(16, 16, 16, 16);
 	groupDialogCheck->setLayout(layout);
 }
 
@@ -584,7 +584,7 @@ void OtherPage::createGroupAdaptation() {
     layout->addWidget(checkNewVersion);
     layout->addSpacing(1);
     layout->addWidget(checkNativeStyle);
-    layout->setMargin(16);
+    layout->setContentsMargins(16, 16, 16, 16);
 	groupAdaptation->setLayout(layout);
 }
 
@@ -611,7 +611,7 @@ void OtherPage::readSettings() {
 	checkLimitLesson->setChecked(settings.value("check_limit_lesson", true).toBool());
 	checkLessonPublish->setChecked(settings.value("check_lesson_publish", true).toBool());
     checkNewVersion->setChecked(settings.value("check_new_version", true).toBool());
-    checkNativeStyle->setChecked(settings.value("check_native_style", false).toBool());
+    checkNativeStyle->setChecked(settings.value("check_native_style", APP_MAC).toBool());
 	settings.endGroup();
 }
 
@@ -627,7 +627,7 @@ bool OtherPage::writeSettings() {
 	#endif
 	settings.beginGroup("general");
 	if (checkNativeStyle->isChecked() !=
-		settings.value("check_native_style", false).toBool()) {
+		settings.value("check_native_style", APP_MAC).toBool()) {
 
 		requireRestart = true;
 	}
@@ -722,7 +722,7 @@ void LanguagePage::createGroupLanguage() {
     layout->addWidget(labelLessonNotice);
     //layout->addSpacing(20);
     layout->addStretch(1);
-	layout->setMargin(16);
+	layout->setContentsMargins(16, 16, 16, 16);
 	groupLanguage->setLayout(layout);
 }
 

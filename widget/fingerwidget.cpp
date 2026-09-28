@@ -126,7 +126,7 @@ void FingerWidget::getChartValues() {
 
 
         rateTemp = query.value(3).toDouble();
-        rateTempString.sprintf("%.0f", rateTemp);
+        rateTempString = QString::number(rateTemp, 'f', 0);
 
         fingerRates[query.value(0).toInt()] = (rateTempString.toInt());
 

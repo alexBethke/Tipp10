@@ -228,16 +228,16 @@ void LessonResult::createOutput() {
 		lessonTokenLen = query.value(3).toString();
 		lessonErrorNum = query.value(4).toString();
         double lessonRateTemp = query.value(8).toDouble();
-        lessonRate.sprintf("%.0f", lessonRateTemp);
+        lessonRate = QString::number(lessonRateTemp, 'f', 0);
         lessonRate.append(" %");
         double lessonCpmTemp = query.value(5).toDouble();
-        lessonCpm.sprintf("%.0f", lessonCpmTemp);
+        lessonCpm = QString::number(lessonCpmTemp, 'f', 0);
         double lessonGradeTemp;
 		if ((lessonGradeTemp = query.value(6).toDouble()) < 0) {
 			lessonGradeTemp = 0;
 		}
-        lessonGrade.sprintf("%.0f", lessonGradeTemp);
-        lessonGradeSimple.sprintf("%.0f", lessonGradeTemp);
+        lessonGrade = QString::number(lessonGradeTemp, 'f', 0);
+        lessonGradeSimple = QString::number(lessonGradeTemp, 'f', 0);
         lessonGrade.append(lessonGradeTemp == 1 ? tr(" Punkt") :  tr(" Punkte"));
 	}
 
@@ -584,15 +584,15 @@ void LessonResult::createPrintOutput() {
 		lessonTokenLen = query.value(3).toString();
 		lessonErrorNum = query.value(4).toString();
         double lessonRateTemp = query.value(8).toDouble();
-        lessonRate.sprintf("%.0f", lessonRateTemp);
+        lessonRate = QString::number(lessonRateTemp, 'f', 0);
         lessonRate.append(" %");
         double lessonCpmTemp = query.value(5).toDouble();
-        lessonCpm.sprintf("%.0f", lessonCpmTemp);
+        lessonCpm = QString::number(lessonCpmTemp, 'f', 0);
         double lessonGradeTemp;
         if ((lessonGradeTemp = query.value(6).toDouble()) < 0) {
             lessonGradeTemp = 0;
         }
-        lessonGrade.sprintf("%.0f", lessonGradeTemp);
+        lessonGrade = QString::number(lessonGradeTemp, 'f', 0);
         lessonGrade.append(lessonGradeTemp == 1 ? tr(" Punkt") :  tr(" Punkte"));
 	}
 
