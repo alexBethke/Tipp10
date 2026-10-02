@@ -124,11 +124,10 @@ QString ErrorMessage::getErrorText(int number) {
 				"in den Einstellungen veraendern.\n");
 			break;
 		case ERR_SQL_DB_APP_COPY:
-			errorText = tr("Die Benutzer-Datenbank konnte nicht in "
-				"Ihrem HOME-Verzeichnis angelegt werden. Eventell fehlen die Schreibrechte.\n"
-				"Es wird nun versucht, die Original-Datenbank im Programmverzeichnis zu verwenden.\n\n"
-				"Den Verzeichnispfad zur Datenbank koennen Sie anschliessend in den "
-				"Einstellungen veraendern.\n");
+			errorText = tr("Die Datenbank konnte nicht neben dem Programm angelegt werden.\n\n"
+                "Bitte verschieben Sie das Programm im Finder in einen Ordner, "
+                "in dem Sie Schreibrechte haben, und starten Sie es erneut.\n"
+                "Die Datenbank tipp10v2.db wird im selben Ordner wie das Programm gespeichert.\n");
 			break;
 		case ERR_SQL_DB_USER_COPY:
 			errorText = tr("Die Benutzer-Datenbank konnte nicht im "

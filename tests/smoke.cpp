@@ -60,6 +60,22 @@ int main(int argc, char **argv) {
     QTimer watchdog;
     QObject::connect(&watchdog, &QTimer::timeout, [] { qFatal("Smoke test timed out"); });
     watchdog.start(20000);
+#if APP_MAC
+    const QString translocated = temporary.filePath("T/AppTranslocation/test/d/tipp10.app/Contents/MacOS");
+    const QString originalSetting = settings.value("database/pathpro").toString();
+    bool installationMessageShown = false;
+    QTimer::singleShot(0, [&] {
+        auto message = qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+        require(message && message->text().contains("Finder"), "Installation guidance missing");
+        installationMessageShown = true;
+        message->accept();
+    });
+    require(!createConnection(translocated), "Translocated app must stop before database initialization");
+    require(installationMessageShown, "Translocation message missing");
+    require(!QFile::exists(applicationDatabasePath(translocated)), "Translocation created a database");
+    require(settings.value("database/pathpro").toString() == originalSetting,
+            "Translocation changed the saved database path");
+#endif
     require(createConnection(appDirectory), "Database initialization failed");
     require(QSqlDatabase::database().databaseName() == applicationDatabasePath(appDirectory),
             "Active database path is incorrect");

@@ -135,6 +135,17 @@ else
         exit 1
     fi
     xcrun stapler staple "$BUILD_DIR/bin/tipp10.app"
+    xcrun stapler validate "$BUILD_DIR/bin/tipp10.app"
+    # Include installation instructions beside the stapled app in the ZIP.
+    PACKAGE_DIR="$BUILD_DIR/distribution/Tipp10"
+    mkdir -p "$PACKAGE_DIR"
+    ditto "$BUILD_DIR/bin/tipp10.app" "$PACKAGE_DIR/tipp10.app"
+    cp "$ROOT/release/Installation-de.txt" "$PACKAGE_DIR/Installation-de.txt"
+    if [ -n "${TIPP10_DATABASE:-}" ]; then
+        printf '\nDieses Paket enthaelt spezielle Uebungen fuer den vorgesehenen Nutzerkreis. Bitte geben Sie dieses Paket nicht weiter.\n' >> "$PACKAGE_DIR/Installation-de.txt"
+    fi
+    cp "$ROOT/LICENSE" "$PACKAGE_DIR/LICENSE"
+    ditto -c -k --keepParent "$PACKAGE_DIR" "$NOTARY_ZIP"
     printf '\nApp ready (signed and notarized): %s/bin/tipp10.app\n' "$BUILD_DIR"
     printf 'Notarized archive for distribution: %s\n' "$NOTARY_ZIP"
 fi

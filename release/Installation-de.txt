@@ -1,0 +1,17 @@
+Tipp10 fuer macOS 26 und neuer (Apple Silicon)
+
+Installation
+------------
+1. Entpacken Sie das ZIP-Archiv.
+2. Doppelklicken Sie das .pkg und folgende Sie den Anweisungen
+3. Das Programm wird standardmäßig im Ordner 'Applications' in Ihrem Benutzerordner angelegt
+
+Die Datenbank tipp10v2.db liegt immer neben tipp10.app. Beim ersten Start
+wird eine vorhandene Datenbank vom bisherigen Speicherort kopiert oder eine
+neue Datenbank aus den mitgelieferten Startlektionen angelegt. Eine Datenbank,
+die bereits neben dem Programm liegt, wird weiterverwendet.
+
+Wenn Sie Tipp10 spaeter verschieben, verschieben Sie die Datenbank mit.
+Wenn Sie Ihre eigenen Lektionen und Trainingsergebnisse aufbewahren möchten,
+sichern Sie die Datei tipp10v2.db gelegentlich und vor dem Import einer anderen
+Datenbank.

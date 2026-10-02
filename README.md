@@ -67,6 +67,25 @@ The root `Makefile` is an old generated Linux build file. Use the macOS script,
 which keeps generated files in `build/macos`. See also Qt's
 [macOS deployment documentation](https://doc.qt.io/qt-6/macos-deployment.html).
 
+## Signed distribution build
+
+Use your Developer ID Application certificate and a saved `notarytool` keychain
+profile to produce a signed, notarized package containing the original lessons:
+
+```sh
+CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
+NOTARIZE_KEYCHAIN_PROFILE="your-profile-name" \
+MACOSX_DEPLOYMENT_TARGET=26.0 \
+BUILD_DIR="$PWD/build/macos-signed" \
+./scripts/build-macos.sh
+```
+
+The final ZIP is `build/macos-signed/bin/tipp10-notarize.zip`. It contains the
+signed app with its Apple notarization ticket attached. Leave `TIPP10_DATABASE`
+unset to include only the original starter lessons. Signing requires keychain
+access; notarization uploads the app to Apple. Without a notarization profile,
+the script produces a signed app and skips notarization.
+
 ## Lessons and database
 
 Default builds bundle only the original `release/tipp10v2.template`.
@@ -106,6 +125,12 @@ My Tipp10 folder/
   tipp10.app
   tipp10v2.db
 ```
+
+After downloading a ZIP, extract it and use Finder to drag `tipp10.app` into a
+writable installation folder before launching it. Starting directly from the
+extracted download can trigger macOS App Translocation, which runs a read-only
+copy of the app and prevents creating the adjacent database. Tipp10 explains
+how to move the app and exits in that case.
 
 Keep the app in a folder you can write to. On first launch, if there is no database
 beside the app, Tipp10 copies the previously configured database (or the legacy
@@ -177,3 +202,28 @@ configured by `APP_EXISTING_LANGUAGES_GUI` in `def/defines.h`.
 The original TIPP10 code and this fork are distributed under the GNU General
 Public License, version 2. See [LICENSE](LICENSE) and the copyright notices in
 the source files.
+
+## Per-user macOS installer
+
+The installer places the app in `~/Applications/Tipp10/tipp10.app`. Its database
+is created alongside the app on first launch; existing databases are not included
+in the installer payload or replaced during upgrades. Only the current user's
+home installation domain is enabled, so the adjacent database folder is writable.
+
+First produce the signed, notarized app, then run:
+
+```sh
+INSTALLER_SIGN_IDENTITY="Developer ID Installer: Your Name (TEAMID)" \
+NOTARIZE_KEYCHAIN_PROFILE="your-profile-name" \
+./scripts/build-installer-macos.sh
+```
+
+The final package is `build/macos-installer/Tipp10-macOS-26-27-arm64.pkg`.
+The **Developer ID Installer** certificate is separate from the **Developer ID
+Application** certificate. Without an installer identity, the script produces
+`Tipp10-UNSIGNED-preview.pkg` for review only; it is not ready for distribution.
+The installer supports Apple Silicon and macOS 26 or newer.
+
+Die deutsche [Release-Checkliste](docs/RELEASE-CHECKLISTE.md) und die
+[Anleitung für das Installer-Zertifikat](docs/INSTALLER-SETUP.md) beschreiben
+die wiederholbaren Builds für Standard- und Spezialreleases.

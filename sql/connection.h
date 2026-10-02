@@ -61,6 +61,21 @@ static QString applicationDatabasePath(const QString &appDirectory = QCoreApplic
 
 // Database connection to SQLite
 static bool createConnection(const QString &appDirectory = QCoreApplication::applicationDirPath()) {
+#if APP_MAC
+    // Gatekeeper can launch downloaded apps from a read-only temporary copy.
+    // Do not create or migrate a database until the user moves the app in Finder.
+    if (appDirectory.contains("/AppTranslocation/")) {
+        QMessageBox::information(nullptr, APP_NAME, QObject::tr(
+            "macOS hat Tipp10 in einem temporaeren, schreibgeschuetzten Ordner gestartet.\n\n"
+            "Bitte beenden Sie Tipp10 und ziehen Sie tipp10.app im Finder in einen "
+            "Ordner, in dem Sie Schreibrechte haben, zum Beispiel in einen neuen "
+            "Ordner Tipp10 in Ihrem Benutzerordner. Starten Sie das Programm danach "
+            "von dort, nicht direkt aus Downloads oder dem ZIP-Archiv.\n\n"
+            "Die Datenbank tipp10v2.db wird neben dem Programm gespeichert. "
+            "Wenn bereits eine Datenbank vorhanden ist, verschieben Sie diese mit dem Programm."));
+        return false;
+    }
+#endif
 	// Path do the database
 	QString dbPath;
 	// Filename of the template database
