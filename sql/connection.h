@@ -43,15 +43,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "widget/errormessage.h"
 #include "sql/startsql.h"
 
+// The writable database lives beside the app bundle (or executable).
+static QString applicationDatabasePath(const QString &appDirectory = QCoreApplication::applicationDirPath()) {
+    QDir directory(appDirectory);
+#if APP_MAC
+    if (directory.dirName() == "MacOS") {
+        directory.cdUp();
+        if (directory.dirName() == "Contents") {
+            directory.cdUp();
+            if (directory.dirName().endsWith(".app"))
+                directory.cdUp();
+        }
+    }
+#endif
+    return directory.filePath(APP_USER_DB);
+}
+
 // Database connection to SQLite
-static bool createConnection() {
-	// Database exist
-	bool dbExist = false;
+static bool createConnection(const QString &appDirectory = QCoreApplication::applicationDirPath()) {
 	// Path do the database
 	QString dbPath;
-	// Path do the home database
-	QString dbHomeTemp;
-	QString dbFolderTemp;
 	// Filename of the template database
 	QString dbNameTemplate = APP_DB;
 	// Filename of the user database
@@ -81,14 +92,9 @@ static bool createConnection() {
 	QSettings settings;
 	#endif
 	settings.beginGroup("database");
-	dbPath = settings.value("pathpro", "").toString();
+	QString previousPath = settings.value("pathpro", "").toString();
 	settings.endGroup();
-
-	// Prtable version
-	if (APP_PORTABLE && dbPath != "") {
-
-		dbPath = QCoreApplication::applicationDirPath() + "/portable/" + dbNameUser;
-	}
+	dbPath = applicationDatabasePath(appDirectory);
 
 	// Search for an old database if first programmstart or if user want to
 	bool searchOldDb = false;
@@ -165,106 +171,38 @@ static bool createConnection() {
 		settings.endGroup();
 	}
 
-	// User path specified?
-	if (dbPath != "") {
-		// User path specified
-		if (QFile::exists(dbPath)) {
-			// User path and file exist
-			dbExist = true;
-		} else {
-			// User file lost?
-			// -> error message
-			/*ErrorMessage *errorMessage = new ErrorMessage();
-			errorMessage->showMessage(ERR_SQL_DB_USER_EXIST, TYPE_INFO,
-				CANCEL_NO, "Betroffener Pfad:\n" + dbPath);*/
-			// Try to create new databae in user path
-			// Exist a database in the program dir?
-			if (QFile::exists(QString(":/") + dbNameTemplate)) {
-			//if (QFile::exists(":/" + dbNameTemplate)) {
-				// A database exist in the program dir
-				// -> copy database to user home dir
-				QFile file(QString(":/") + dbNameTemplate);
-				//QFile file(":/" + dbNameTemplate);
-				if (file.copy(dbPath)) {
-					QFile::setPermissions(dbPath, QFile::permissions(dbPath) | QFile::WriteUser);
-					dbExist = true;
-				} else {
-					ErrorMessage *errorMessage = new ErrorMessage();
-					errorMessage->showMessage(ERR_SQL_DB_USER_COPY, TYPE_WARNING,
-						CANCEL_NO, QObject::tr("Betroffener Kopierpfad:\n") + dbPath);
-				}
-			} else {
-				// No database found in program dir
-				ErrorMessage *errorMessage = new ErrorMessage();
-				errorMessage->showMessage(ERR_SQL_DB_APP_EXIST, TYPE_CRITICAL,
-					CANCEL_PROGRAM, QObject::tr("Betroffener Pfad:\n") + dbPath);
-				return false;
-			}
-		}
-	}
-	// No user path specified or file lost
-	// (first program start oder registry was cleaned)
-	if (!dbExist) {
-        if (APP_PORTABLE == false) {
-            dbHomeTemp = QDir::homePath();
-            dbFolderTemp = "tipp10";
-            if (!QFile::exists(QDir::homePath() + "/" + dbFolderTemp + "/" + dbNameUser)) {
-                dbFolderTemp = "tipp10";
-                #if APP_WIN
-                QSettings homeAppPath("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", QSettings::NativeFormat);
-                dbHomeTemp = homeAppPath.value("AppData").toString();
-                #endif
-                #if APP_MAC
-                dbHomeTemp.append("/Library/Application Support");
-                #endif
+    // Preserve existing data when switching from the previous storage location.
+    // An existing database beside the app always takes precedence.
+    if (!QFile::exists(dbPath)) {
+        QStringList candidates;
+        candidates << previousPath;
+        candidates << QCoreApplication::applicationDirPath() + "/portable/" + dbNameUser;
+        candidates << QDir::homePath() + "/tipp10/" + dbNameUser;
+#if APP_MAC
+        candidates << QDir::homePath() + "/Library/Application Support/tipp10/" + dbNameUser;
+#endif
+#if APP_WIN
+        QSettings homeAppPath("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", QSettings::NativeFormat);
+        candidates << homeAppPath.value("AppData").toString() + "/tipp10/" + dbNameUser;
+#endif
+        QString source = QString(":/") + dbNameTemplate;
+        for (const QString &candidate : candidates) {
+            if (!candidate.isEmpty() && QFile::exists(candidate)) {
+                source = candidate;
+                break;
             }
-            dbPath = dbHomeTemp + "/" + dbFolderTemp + "/" + dbNameUser;
+        }
+        if (!QFile::copy(source, dbPath)) {
+            ErrorMessage *errorMessage = new ErrorMessage();
+            errorMessage->showMessage(ERR_SQL_DB_APP_COPY, TYPE_CRITICAL,
+                CANCEL_NO, QObject::tr("Betroffener Kopierpfad:\n") + dbPath);
+            return false;
+        }
+        if (!QFile::setPermissions(dbPath, QFile::permissions(dbPath) | QFile::WriteUser)) {
+            return false;
+        }
+    }
 
-		} else {
-			// Portable version
-			dbHomeTemp = QCoreApplication::applicationDirPath();
-			dbFolderTemp = "portable";
-			dbPath = QCoreApplication::applicationDirPath() + "/portable/" + dbNameUser;
-		}
-		// Exist a database in user's home dir?
-        if (QFile::exists(dbPath) == false) {
-			// Exist a database template in the program dir?
-			dbPath = QString(":/") + dbNameTemplate;
-			//dbPath = ":/" + dbNameTemplate;
-			if (QFile::exists(dbPath)) {
-				// A database template exist in the program dir
-				// -> copy database to user home dir
-				QDir dir(dbHomeTemp);
-				dir.mkdir(dbFolderTemp);
-				dir.cd(dbFolderTemp);
-				QFile file(dbPath);
-				if (file.copy(dir.path() + "/" + dbNameUser)) {
-					QFile::setPermissions(dir.path() + "/" + dbNameUser, QFile::permissions(dir.path() + "/" + dbNameUser) | QFile::WriteUser);
-					dbPath = dir.path() + "/" + dbNameUser;
-				} else {
-					ErrorMessage *errorMessage = new ErrorMessage();
-					errorMessage->showMessage(ERR_SQL_DB_APP_COPY, TYPE_CRITICAL,
-                        CANCEL_NO, QObject::tr("Betroffener Kopierpfad:\n") + dbPath + " bzw. " + dir.path());
-				}
-			} else {
-				// No database found in program dir
-				ErrorMessage *errorMessage = new ErrorMessage();
-				errorMessage->showMessage(ERR_SQL_DB_APP_EXIST, TYPE_CRITICAL,
-					CANCEL_PROGRAM, QObject::tr("Betroffener Pfad:\n") + dbPath);
-				return false;
-			}
-		}
-	}
-
-
-	// Check wether the database exists to avoid that it
-    // will be created if it doesn't exist
-    /*if (!QFile::exists(dbPath)) {
-		// Error message
-		ErrorMessage *errorMessage = new ErrorMessage();
-		errorMessage->showMessage(ERR_SQL_DB, TYPE_CRITICAL, CANCEL_PROGRAM);
-        return false;
-	}*/
     if (QSqlDatabase::contains()) {
         db = QSqlDatabase::database();
         db.close();

@@ -371,18 +371,9 @@ void DatabasePage::createGroupDatabase() {
 	buttonDatabasePath->setMaximumWidth(30);
     buttonDatabasePath->setFixedHeight(20);
 
-	if (!APP_PORTABLE) {
-		labelDatabaseExplain = new QLabel(tr("Wenn im angegebenen "
-			"Verzeichnis keine Datei ") + "\"" +
-			APP_USER_DB + "\"" + tr(" existiert, "
-			"wird automatisch eine neue, leere Datenbank erzeugt."));
-	} else {
-		labelDatabaseExplain = new QLabel(tr("Der Pfad kann "
-			"bei der portablen Version von ") +
-			APP_NAME + tr(" nicht veraendert werden."));
-		lineDatabasePath->setEnabled(false);
-		buttonDatabasePath->setEnabled(false);
-	}
+	labelDatabaseExplain = new QLabel(tr("Die Datenbank wird im selben Verzeichnis wie die Anwendung gespeichert."));
+	lineDatabasePath->setReadOnly(true);
+	buttonDatabasePath->setEnabled(false);
     QFont h2;
     #if APP_MAC
     h2.setPointSize(11);

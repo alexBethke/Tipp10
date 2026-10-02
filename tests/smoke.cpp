@@ -33,7 +33,26 @@ int main(int argc, char **argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, temporary.path());
     QSettings settings;
-    settings.setValue("database/pathpro", temporary.filePath("test.db"));
+    // Simulate a macOS bundle in an isolated, writable app folder.
+    const QString executable = temporary.filePath("tipp10.app/Contents/MacOS/tipp10");
+    require(QDir().mkpath(QFileInfo(executable).absolutePath()), "App folder creation failed");
+    const QString appDirectory = QFileInfo(executable).absolutePath();
+    require(applicationDatabasePath(appDirectory) == temporary.filePath("tipp10v2.db"),
+            "Database is not beside the app bundle");
+    const QString previousPath = temporary.filePath("previous.db");
+    require(QFile::copy(":/tipp10v2.template", previousPath), "Previous database setup failed");
+    require(QFile::setPermissions(previousPath, QFile::permissions(previousPath) | QFile::WriteUser),
+            "Previous database permissions failed");
+    {
+        QSqlDatabase previous = QSqlDatabase::addDatabase("QSQLITE", "migration-source");
+        previous.setDatabaseName(previousPath);
+        require(previous.open(), "Previous database open failed");
+        QSqlQuery marker(previous);
+        require(marker.exec("CREATE TABLE migration_marker (value TEXT)"), "Migration marker failed");
+        previous.close();
+    }
+    QSqlDatabase::removeDatabase("migration-source");
+    settings.setValue("database/pathpro", previousPath);
     settings.setValue("general/language_gui", "de");
     settings.setValue("general/language_layout", APP_STD_LANGUAGE_LAYOUT);
     settings.setValue("general/language_lesson", "de_de_qwertz");
@@ -41,8 +60,12 @@ int main(int argc, char **argv) {
     QTimer watchdog;
     QObject::connect(&watchdog, &QTimer::timeout, [] { qFatal("Smoke test timed out"); });
     watchdog.start(20000);
-    require(createConnection(), "Database initialization failed");
+    require(createConnection(appDirectory), "Database initialization failed");
+    require(QSqlDatabase::database().databaseName() == applicationDatabasePath(appDirectory),
+            "Active database path is incorrect");
+    require(QFile::exists(previousPath), "Migration removed the original database");
     QSqlQuery query;
+    require(query.exec("SELECT COUNT(*) FROM migration_marker"), "Previous database was not migrated");
     require(query.exec("SELECT COUNT(*) FROM lesson_list"), "Lesson query failed");
     require(query.next() && query.value(0).toInt() > 0, "No lessons installed");
     MainWindow window;
@@ -66,7 +89,8 @@ int main(int argc, char **argv) {
     auto browser = help.findChild<QTextBrowser *>();
     require(browser && !browser->toPlainText().isEmpty(), "Embedded help missing");
     query.finish();
-    require(createConnection(), "Database reopen failed");
+    settings.setValue("database/pathpro", previousPath);
+    require(createConnection(appDirectory), "Database reopen failed");
     require(query.exec("SELECT COUNT(*) FROM user_lesson_list"), "Reopened results query failed");
     require(query.next() && query.value(0).toInt() == 1, "Saved result lost after reopening");
     settings.sync();

@@ -59,6 +59,10 @@ Build settings can be overridden with environment variables:
 | `JOBS` | Set parallel build jobs; defaults to 8. |
 | `MACOSX_DEPLOYMENT_TARGET` | Target an older macOS version, only if all installed Qt libraries support it. |
 
+After changing code, run `./scripts/build-macos.sh` again before copying the app.
+A plain `make` rebuild relinks against Homebrew; the packaging step must run again
+to restore bundled library paths. A valid code signature alone does not check this.
+
 The root `Makefile` is an old generated Linux build file. Use the macOS script,
 which keeps generated files in `build/macos`. See also Qt's
 [macOS deployment documentation](https://doc.qt.io/qt-6/macos-deployment.html).
@@ -94,19 +98,24 @@ The optional bundling feature does not grant rights to third-party lessons.
 ### Active user database
 
 The selected starter database is embedded under the internal resource name
-`tipp10v2.template`. On first launch, the app creates a writable copy at:
+`tipp10v2.template`. The writable `tipp10v2.db` lives directly beside
+`tipp10.app` on macOS, or beside the executable on other platforms. For example:
 
 ```text
-~/Library/Application Support/tipp10/tipp10v2.db
+My Tipp10 folder/
+  tipp10.app
+  tipp10v2.db
 ```
 
-Previously configured database locations are respected. Custom lessons appear
-under **Eigene Lektionen**.
+Keep the app in a folder you can write to. On first launch, if there is no database
+beside the app, Tipp10 copies the previously configured database (or the legacy
+user database) there, preserving lessons and training results. The original file
+is retained. If no previous database exists, it copies the embedded starter.
+An existing database beside the app always takes precedence.
 
-Both standard and custom builds use the same user settings and database location.
-Replacing or rebuilding the app **does not replace an existing user database**.
-Your installed lessons therefore remain available when you run a standard build
-on the same Mac, even though they are not in that app's bundle.
+The location shown in settings is read-only. When moving the app, move
+`tipp10v2.db` with it. Replacing or rebuilding the app leaves that file intact.
+Custom lessons appear under **Eigene Lektionen**.
 
 ### Importing and exporting the database
 
@@ -126,7 +135,7 @@ manually instead:
 
 1. Quit Tipp10 completely.
 2. Locate the active database. The default location is shown above; check the
-   database path in the application's settings if you have changed it.
+   database path displayed in the application's settings.
 3. Back up that database. It contains your own lessons and training history.
 4. Copy your chosen database into that location as `tipp10v2.db`.
 5. Reopen Tipp10 and select **Eigene Lektionen**.
